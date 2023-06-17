@@ -5,6 +5,23 @@ import (
 	"time"
 )
 
+func TestDate(t *testing.T) {
+	testcase := time.Date(2023, 6, 15, 6, 9, 0, 0, time.UTC)
+	wantY, wantM, wantD := 2023.0, 6.0, 15.25625
+	if gotY, gotM, gotD := NewCivilTime(testcase).Date(); gotY != wantY || gotM != wantM || gotD != wantD {
+		t.Errorf("NewCivilTime(%v).Date() = (%v, %v, %v), want (%v, %v, %v)", testcase, gotY, gotM, gotD, wantY, wantM, wantD)
+	}
+}
+
+func TestEqual(t *testing.T) {
+	now := time.Now()
+	local := NewCivilTime(now.Local())
+	utc := NewCivilTime(now.UTC())
+	if !local.Equal(utc) {
+		t.Errorf("CivilTime %v is not equal %v", local, utc)
+	}
+}
+
 func TestJulianDay(t *testing.T) {
 	// dates before 1582-10-15 are converted from Julian calendar to Gregorian using:
 	// https://legacy-www.math.harvard.edu/computing/javascript/Calendar/index.html
@@ -45,5 +62,13 @@ func TestJulianDay(t *testing.T) {
 		if got := round(NewCivilTime(time).JulianDay(), 7); got != want {
 			t.Errorf("NewCivilTime(%v).JulianDay() = %v, want %v", time, got, want)
 		}
+	}
+}
+
+func TestToUTC(t *testing.T) {
+	now := time.Now()
+	want := NewCivilTime(now.UTC())
+	if got := NewCivilTime(now).ToUTC(); !got.Equal(want) {
+		t.Errorf("NewCivilTime(%v).ToUTC() = %v, want %v", now, got, want)
 	}
 }
