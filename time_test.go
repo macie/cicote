@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestDate(t *testing.T) {
+func TestCivilTimeDate(t *testing.T) {
 	testcase := time.Date(2023, 6, 15, 6, 9, 0, 0, time.UTC)
 	wantY, wantM, wantD := 2023.0, 6.0, 15.25625
 	if gotY, gotM, gotD := NewCivilTime(testcase).Date(); gotY != wantY || gotM != wantM || gotD != wantD {
@@ -13,7 +13,7 @@ func TestDate(t *testing.T) {
 	}
 }
 
-func TestEqual(t *testing.T) {
+func TestCivilTimeEqual(t *testing.T) {
 	now := time.Now()
 	local := NewCivilTime(now.Local())
 	utc := NewCivilTime(now.UTC())
@@ -65,7 +65,7 @@ func TestJulianDay(t *testing.T) {
 	}
 }
 
-func TestToLCT(t *testing.T) {
+func TestCivilTimeToLCT(t *testing.T) {
 	now := time.Now().UTC()
 	offset := -2*time.Hour - 30*time.Minute
 	want := NewCivilTime(now)
@@ -74,7 +74,7 @@ func TestToLCT(t *testing.T) {
 	}
 }
 
-func TestToUTC(t *testing.T) {
+func TestCivilTimeToUTC(t *testing.T) {
 	now := time.Now()
 	want := NewCivilTime(now.UTC())
 	if got := NewCivilTime(now).ToUTC(); !got.Equal(want) {
