@@ -58,6 +58,20 @@ func (ct CivilTime) JulianDay() float64 {
 	return JD
 }
 
+// String returns the time formatted as ISO 8601.
+func (ct CivilTime) String() string {
+	return ct.local.Format(time.RFC3339)
+}
+
+// ToLCT returns copy of ct representing the same time instant, but with the
+// copy's location changed by offset for display purposes.
+func (ct CivilTime) ToLCT(offset time.Duration) CivilTime {
+	zone := time.FixedZone("local", int(math.Round(offset.Seconds())))
+	return CivilTime{
+		local: ct.local.In(zone),
+	}
+}
+
 // ToUTC returns copy of ct representing the same time instant, but with the
 // copy's location information set to UTC for display purposes.
 func (ct CivilTime) ToUTC() CivilTime {

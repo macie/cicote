@@ -65,10 +65,19 @@ func TestJulianDay(t *testing.T) {
 	}
 }
 
+func TestToLCT(t *testing.T) {
+	now := time.Now().UTC()
+	offset := -2*time.Hour - 30*time.Minute
+	want := NewCivilTime(now)
+	if got := NewCivilTime(now).ToLCT(offset); !got.Equal(want) {
+		t.Errorf("NewCivilTime(%v).ToLCT(%v) is %v, want %v", now, offset, got, want)
+	}
+}
+
 func TestToUTC(t *testing.T) {
 	now := time.Now()
 	want := NewCivilTime(now.UTC())
 	if got := NewCivilTime(now).ToUTC(); !got.Equal(want) {
-		t.Errorf("NewCivilTime(%v).ToUTC() = %v, want %v", now, got, want)
+		t.Errorf("NewCivilTime(%v).ToUTC() is %v, want %v", now, got, want)
 	}
 }
