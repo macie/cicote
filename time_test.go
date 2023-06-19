@@ -44,7 +44,7 @@ func TestJulianDay(t *testing.T) {
 		time.Date(-1001, 8, 7, 21, 36, 0, 0, time.UTC):  1355671.4,       // Julian: -1001-08-17
 		time.Date(-4713, 11, 24, 12, 0, 0, 0, time.UTC): 0,               // Julian: -4712-01-01
 		// test cases from S. Urban and P.K. Seidelmann "Explanatory Supplement
-		// to the Astronomical Almanac" (2012)
+		// to the Astronomical Almanac" (2013)
 		time.Date(2000, 1, 1, 12, 0, 0, 0, time.UTC):  2451545,
 		time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC):   2451544.5,
 		time.Date(1984, 2, 2, 12, 0, 0, 0, time.UTC):  2445733,
@@ -57,6 +57,17 @@ func TestJulianDay(t *testing.T) {
 		time.Date(1, 1, 1, 12, 0, 0, 0, time.UTC):     1721426, // Julian:  0001-01-03
 		time.Date(-746, 2, 18, 12, 0, 0, 0, time.UTC): 1448638, // Julian: -0746-02-26
 		time.Date(-3760, 9, 7, 12, 0, 0, 0, time.UTC): 347998,  // Julian: -3760-10-07
+		// test cases from J.L. Lawrence "Celestial Calculations" (2019)
+		time.Date(2015, 5, 10, 18, 0, 0, 0, time.UTC): 2457153.25,
+		time.Date(2015, 5, 10, 6, 0, 0, 0, time.UTC):  2457152.75,
+		time.Date(2015, 3, 21, 12, 0, 0, 0, time.UTC): 2457103,
+		time.Date(2010, 11, 1, 0, 0, 0, 0, time.UTC):  2455501.5,
+		time.Date(2010, 2, 7, 0, 0, 0, 0, time.UTC):   2455234.5,
+		time.Date(2010, 1, 1, 0, 0, 0, 0, time.UTC):   2455197.5,
+		time.Date(1985, 2, 7, 0, 0, 0, 0, time.UTC):   2446103.5,
+		time.Date(1858, 11, 17, 0, 0, 0, 0, time.UTC): 2400000.5,
+		time.Date(1582, 10, 16, 0, 0, 0, 0, time.UTC): 2299161.5,
+		time.Date(1582, 10, 15, 0, 0, 0, 0, time.UTC): 2299160.5,
 	}
 	for time, want := range testcases {
 		if got := round(NewCivilTime(time).JulianDay(), 7); got != want {
