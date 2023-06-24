@@ -92,3 +92,34 @@ func TestCivilTimeToUTC(t *testing.T) {
 		t.Errorf("NewCivilTime(%v).ToUTC() is %v, want %v", now, got, want)
 	}
 }
+
+func TestCivilTimeToGST(t *testing.T) {
+	testcases := map[time.Time]string{
+		// test cases from J. Meeus "Astronomical Algorithms" (1998)
+		time.Date(1987, 4, 10, 19, 21, 0, 0, time.UTC): "1987-04-10 08:34:57.1 +0.0000° GST", // book:  8h34m57.0896s
+		time.Date(1987, 4, 10, 0, 0, 0, 0, time.UTC):   "1987-04-10 13:10:46.4 +0.0000° GST", // book: 13h10m46.1351s
+		// test cases from J.L. Lawrence "Celestial Calculations" (2019)
+		time.Date(2010, 12, 13, 1, 0, 0, 0, time.UTC): "2010-12-13 06:26:27.0 +0.0000° GST", // book: 6h26m34s
+		time.Date(2010, 2, 7, 23, 30, 0, 0, time.UTC): "2010-02-07 08:41:53.2 +0.0000° GST", // book: 8h41m53s
+		time.Date(2000, 7, 5, 7, 0, 0, 0, time.UTC):   "2000-07-05 01:54:20.6 +0.0000° GST", // book: 1h54m20s
+	}
+	for tc, want := range testcases {
+		if got := NewCivilTime(tc).ToGST().String(); got != want {
+			t.Errorf("CivilTime(%v).ToGST() is %v, want %v", tc, got, want)
+		}
+	}
+}
+
+func TestSiderealTimeString(t *testing.T) {
+	testcases := map[float64]string{
+		-(2*3600 + 20*60 + 1): "2025-06-23 -2:20:01.0 +15.2000° GST",
+		0:                     "2025-06-23 00:00:00.0 +15.2000° GST",
+		1*3600 + 30*60 + 2.45: "2025-06-23 01:30:02.4 +15.2000° GST",
+		50*3600 + 3*60 + 59:   "2025-06-23 50:03:59.0 +15.2000° GST",
+	}
+	for tc, want := range testcases {
+		if got := (SiderealTime{date: time.Date(2025, 6, 23, 1, 2, 3, 0, time.UTC), hourAngleInSec: tc, longitude: 15.2}).String(); got != want {
+			t.Errorf("SiderealTime(%v).String() = %v, want %v", tc, got, want)
+		}
+	}
+}
