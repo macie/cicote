@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"testing"
 	"time"
 )
@@ -120,6 +121,24 @@ func TestSiderealTimeString(t *testing.T) {
 	for tc, want := range testcases {
 		if got := (SiderealTime{date: time.Date(2025, 6, 23, 1, 2, 3, 0, time.UTC), hourAngleInSec: tc, longitude: 15.2}).String(); got != want {
 			t.Errorf("SiderealTime(%v).String() = %v, want %v", tc, got, want)
+		}
+	}
+}
+
+func TestSiderealTimeToLST(t *testing.T) {
+	testcases := map[[2]string]string{
+		// test cases from P. Duffet-Smith and J. Zwart "Practical Astronomy
+		// with your Calculator or Spreadsheet" (2011)
+		{"1980-04-22T14:36:51.67Z", "0"}: "1980-04-22 04:40:05.2 +0.0000° GST",
+		// test cases from J.L. Lawrence "Celestial Calculations" (2019)
+		{"2014-12-12T20:00:00-05:00", "-77"}: "2014-12-13 01:18:34.4 -77.0000° GST",
+		{"2000-07-05T12:00:00+05:00", "60"}:  "2000-07-05 05:54:20.6 +60.0000° GST",
+	}
+	for tc, want := range testcases {
+		localDate, _ := time.Parse(time.RFC3339, tc[0])
+		long, _ := strconv.ParseFloat(tc[1], 64)
+		if got := NewGreenwichMeanSiderealTime(localDate).ToLST(long).String(); got != want {
+			t.Errorf("NewGreenwichMeanSiderealTime(\"%v\").ToLST(%v) = \"%v\", want \"%v\"", tc[0], long, got, want)
 		}
 	}
 }

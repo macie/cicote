@@ -103,6 +103,13 @@ func (ct CivilTime) ToGST() SiderealTime {
 	return SiderealTime{longitude: 0, date: date, hourAngleInSec: GST}
 }
 
+// ToLST returns SiderealTime for mean equinox at given longitude (local mean
+// sidereal time) representing the same time instant. East longitudes are
+// positive.
+func (ct CivilTime) ToLST(longitude float64) SiderealTime {
+	return ct.ToGST().ToLST(longitude)
+}
+
 // A SiderealTime represents an instant in time defined relative to the position
 // of fixed stars without correction for Earth nutation (mean sidereal time).
 type SiderealTime struct {
@@ -118,10 +125,51 @@ func NewGreenwichMeanSiderealTime(t time.Time) SiderealTime {
 	return NewCivilTime(t).ToGST()
 }
 
+// NewLocalMeanSiderealTime creates new SiderealTime at given longitude
+// corresponding to the given time in proleptic Gregorian calendar
+// with accuracy ± 1 second (due to using UTC time instead of UT1). East
+// longitudes are positive.
+func NewLocalMeanSiderealTime(t time.Time, longitude float64) SiderealTime {
+	return NewCivilTime(t).ToLST(longitude)
+}
+
 // String returns the time formatted similar to ISO 8601.
 func (st SiderealTime) String() string {
 	hour := math.Trunc(st.hourAngleInSec / (60 * 60))
 	min := math.Abs(math.Mod(math.Trunc(st.hourAngleInSec/60), 60))
 	sec := math.Abs(math.Mod(st.hourAngleInSec, 60))
 	return fmt.Sprintf("%v %02.0f:%02.0f:%04.1f %+.4f° GST", st.date.Format(time.DateOnly), hour, min, sec, st.longitude)
+}
+
+// ToLST returns SiderealTime at given longitude (local mean sidereal time)
+// representing the same time instant. East longitudes are positive.
+//
+// Method is based on algorithm from J.L. Lawrence "Celestial Calculations"
+// (2019). This implementation computes local mean sidereal time without
+// the intermediate step of conversion to GST.
+func (st SiderealTime) ToLST(longitude float64) SiderealTime {
+	if st.longitude == longitude {
+		return st
+	}
+
+	const hourInSec = 3600
+	const dayInSec = 86400
+	LST := st.hourAngleInSec - hourInSec*(st.longitude-longitude)/15
+	if LST < 0 {
+		LST += dayInSec
+	}
+	if LST > dayInSec {
+		LST -= dayInSec
+	}
+
+	return SiderealTime{longitude: longitude, hourAngleInSec: LST, date: st.date}
+}
+
+// ToGST returns SiderealTime at 0 longitude (Greenwich mean sidereal time)
+// representing the same time instant.
+func (st SiderealTime) ToGST() SiderealTime {
+	if st.longitude == 0 {
+		return st
+	}
+	return st.ToLST(0)
 }
