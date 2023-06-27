@@ -88,6 +88,7 @@ func (ct CivilTime) ToUTC() CivilTime {
 // Supplement to the Astronomical Almanac" (2013) with precession correction
 // for dates from range 1000-3000 year.
 func (ct CivilTime) ToGST() SiderealTime {
+	const dayInSec = 86400
 	utc := ct.ToUTC()
 	year, month, day := utc.Date()
 	date := time.Date(int(year), time.Month(month), int(day), 0, 0, 0, 0, time.UTC)
@@ -95,12 +96,12 @@ func (ct CivilTime) ToGST() SiderealTime {
 	t_U := utc.JulianDay() - 2451545                            // Julian date from epoch J2000.0
 	t := t_U / 36525                                            // Julian centuries from epoch J2000.0
 	precession := 0.00096707 + t*(307.47710227+t*(0.092772113)) // -0.000000029 * t^3 + 0.000001997 * t^4
-	GST := math.FMA(86400, 0.7790572732640+1.00273781191135448*t_U, precession)
-	GST = math.Mod(GST, 86400)
+	GST := math.FMA(dayInSec, 0.7790572732640+1.00273781191135448*t_U, precession)
+	GST = math.Mod(GST, dayInSec)
 	if GST < 0 {
-		GST += 86400
+		GST += dayInSec
 	}
-	return SiderealTime{longitude: 0, date: date, hourAngleInSec: GST}
+	return SiderealTime{longitude: 0, date: date, timeInSec: GST}
 }
 
 // ToLST returns SiderealTime for mean equinox at given longitude (local mean
@@ -113,9 +114,9 @@ func (ct CivilTime) ToLST(longitude float64) SiderealTime {
 // A SiderealTime represents an instant in time defined relative to the position
 // of fixed stars without correction for Earth nutation (mean sidereal time).
 type SiderealTime struct {
-	longitude      float64
-	hourAngleInSec float64
-	date           time.Time
+	longitude float64
+	timeInSec float64
+	date      time.Time
 }
 
 // NewGreenwichMeanSiderealTime creates new SiderealTime at 0 longitude
@@ -135,9 +136,9 @@ func NewLocalMeanSiderealTime(t time.Time, longitude float64) SiderealTime {
 
 // String returns the time formatted similar to ISO 8601.
 func (st SiderealTime) String() string {
-	hour := math.Trunc(st.hourAngleInSec / (60 * 60))
-	min := math.Abs(math.Mod(math.Trunc(st.hourAngleInSec/60), 60))
-	sec := math.Abs(math.Mod(st.hourAngleInSec, 60))
+	hour := math.Trunc(st.timeInSec / (60 * 60))
+	min := math.Abs(math.Mod(math.Trunc(st.timeInSec/60), 60))
+	sec := math.Abs(math.Mod(st.timeInSec, 60))
 	return fmt.Sprintf("%v %02.0f:%02.0f:%04.1f %+.4f° GST", st.date.Format(time.DateOnly), hour, min, sec, st.longitude)
 }
 
@@ -154,7 +155,7 @@ func (st SiderealTime) ToLST(longitude float64) SiderealTime {
 
 	const hourInSec = 3600
 	const dayInSec = 86400
-	LST := st.hourAngleInSec - hourInSec*(st.longitude-longitude)/15
+	LST := st.timeInSec - hourInSec*(st.longitude-longitude)/15
 	if LST < 0 {
 		LST += dayInSec
 	}
@@ -162,7 +163,7 @@ func (st SiderealTime) ToLST(longitude float64) SiderealTime {
 		LST -= dayInSec
 	}
 
-	return SiderealTime{longitude: longitude, hourAngleInSec: LST, date: st.date}
+	return SiderealTime{longitude: longitude, timeInSec: LST, date: st.date}
 }
 
 // ToGST returns SiderealTime at 0 longitude (Greenwich mean sidereal time)
