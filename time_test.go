@@ -119,7 +119,7 @@ func TestSiderealTimeString(t *testing.T) {
 		50*3600 + 3*60 + 59:   "2025-06-23 50:03:59.0 +15.2000° GST",
 	}
 	for tc, want := range testcases {
-		if got := (SiderealTime{date: time.Date(2025, 6, 23, 1, 2, 3, 0, time.UTC), hourAngleInSec: tc, longitude: 15.2}).String(); got != want {
+		if got := (SiderealTime{date: time.Date(2025, 6, 23, 1, 2, 3, 0, time.UTC), timeInSec: tc, longitude: 15.2}).String(); got != want {
 			t.Errorf("SiderealTime(%v).String() = %v, want %v", tc, got, want)
 		}
 	}
