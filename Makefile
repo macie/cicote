@@ -3,27 +3,28 @@
 
 # MAIN TARGETS
 
-all: test check build
+all: install-dependencies
 
 clean:
 	@echo '# Remove build cache: go clean -cache' >&2
 	@go clean -cache
 
-build:
-	@echo '# Build production version: go build -ldflags="-s -w" .' >&2
-	@go build -ldflags="-s -w" .
-
-debug:
+info:
 	@printf '# OS info: '
 	@uname -rsv;
 	@echo '# Development dependencies:'
-	@echo; go version || true
+	@go version || true
+	@echo '# Go environment variables:'
+	@go env || true
 
 check:
-	@printf '# Static analysis: go vet .' >&2
-	@go vet .
+	@echo '# Static analysis: go vet' >&2
+	@go vet
 	
 test:
 	@echo '# Unit tests: go test .' >&2
 	@go test .
 
+install-dependencies:
+	@echo '# Install dependencies:' >&2
+	@go get -v -x .
