@@ -32,32 +32,6 @@ func (ct CivilTime) Equal(ct2 CivilTime) bool {
 	return ct.local.Equal(ct2.local)
 }
 
-// JulianDay returns number of days counted from -4713-11-24T12:00Z (noon of
-// 24 November -4714 BC) in proleptic Gregorian calendar (in Julian calendar it
-// is -4712-01-01T12:00Z or noon of January 1, 4713 BC).
-//
-// Method mostly implements algorithm from J.L. Lawrence "Celestial Calculations"
-// (2019) which is improved version of algorithm from J. Meeus "Astronomical
-// Algorithms" (1998). Differences in current implementation:
-// - in Go constant numbers are not rounded, so equation can use 30.6 instead of
-//   30.6001
-// - removed correction for Julian calendar.
-func (ct CivilTime) JulianDay() float64 {
-	y, m, d := ct.ToUTC().Date()
-	if m <= 2 {
-		y -= 1
-		m += 12
-	}
-	T := 0.0
-	if y < 0 {
-		T = 0.75
-	}
-	A := math.Trunc(y / 100)
-	B := 2 - A + math.Trunc(A/4)
-	JD := B + math.Trunc(365.25*y-T) + math.Trunc(30.6*(m+1)) + d + 1720994.5
-	return JD
-}
-
 // String returns the time formatted as ISO 8601.
 func (ct CivilTime) String() string {
 	return ct.local.Format(time.RFC3339)
@@ -93,7 +67,7 @@ func (ct CivilTime) ToGST() SiderealTime {
 	year, month, day := utc.Date()
 	date := time.Date(int(year), time.Month(month), int(day), 0, 0, 0, 0, time.UTC)
 
-	t_U := utc.JulianDay() - 2451545                            // Julian date from epoch J2000.0
+	t_U := JulianDay(utc) - 2451545                             // Julian date from epoch J2000.0
 	t := t_U / 36525                                            // Julian centuries from epoch J2000.0
 	precession := 0.00096707 + t*(307.47710227+t*(0.092772113)) // -0.000000029 * t^3 + 0.000001997 * t^4
 	GST := math.FMA(dayInSec, 0.7790572732640+1.00273781191135448*t_U, precession)
